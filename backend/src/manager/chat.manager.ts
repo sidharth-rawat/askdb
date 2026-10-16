@@ -20,6 +20,10 @@ const ask = async (
 ): Promise<AskResponse> => {
 
   try {
+    // Transparently rebuild the live pool + schema cache if they were lost
+    // (e.g. after a backend restart) so the user doesn't hit "no active pool".
+    await databaseManager.ensureConnected({ databaseId, db, redis });
+
     // Get cached schema from Redis
     const cachedSchema = await redisService.getCachedSchema(redis, databaseId);
     if (!cachedSchema) {

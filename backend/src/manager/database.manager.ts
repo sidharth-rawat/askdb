@@ -299,10 +299,28 @@ export const explain = async (
   return result;
 };
 
+/** Rebuild the live connection pool (and re-cache the schema) if it was lost,
+ * e.g. after a backend restart — makes reconnection transparent to the user
+ * instead of failing with "No active connection pool found". */
+const ensureConnected = async ({
+  databaseId,
+  db,
+  redis,
+}: {
+  databaseId: string;
+  db: any;
+  redis: Redis;
+}) => {
+  const pool = getPool(databaseId);
+  if (pool) return;
+  await connectDatabase({ databaseId, db, redis });
+};
+
 export {
   testConnection,
   saveDatabaseCredentials,
   connectDatabase,
+  ensureConnected,
   deleteDatabases,
   disconnectDatabase,
   executeQuery,
