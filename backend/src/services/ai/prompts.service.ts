@@ -83,7 +83,7 @@ Rules:
 3. Preserve exact casing of identifiers (table/column names) from the schema.
 4. Use explicit JOIN syntax.
 5. Do not use implicit joins.
-6. The stored casing of text VALUES is unknown, so compare text/string values case-insensitively. For an equality filter on a text column, use ILIKE instead of = (e.g. "status" ILIKE 'completed'), or LOWER("col") = LOWER('value'). This applies only to literal string values in WHERE/HAVING — never change identifier casing.
+6. The stored casing of text VALUES is unknown, so compare string values case-insensitively AND cast the column to text first (this works for text, varchar, AND enum/USER-DEFINED columns, which ILIKE cannot match directly): write "col"::text ILIKE 'value' (e.g. "status"::text ILIKE 'confirmed'). Always use the ::text cast form for string value filters. This applies only to literal string values in WHERE/HAVING — never change identifier casing.
 `;
 
 export const MONGO_PROMPT = `
