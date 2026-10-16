@@ -76,9 +76,17 @@ export const normalizeSchema = (raw: {
         table.indexes = [];
       }
 
+      // node-pg may return array_agg as a raw string like "{id,status}" for
+      // some array types, so coerce to a real string[] defensively.
+      const cols = Array.isArray(idx.columns)
+        ? idx.columns
+        : typeof idx.columns === "string"
+          ? idx.columns.replace(/^\{|\}$/g, "").split(",").filter(Boolean)
+          : [];
+
       table.indexes.push({
         name: idx.index_name,
-        columns: idx.columns ?? [],
+        columns: cols,
         unique: idx.is_unique === true,
       });
     }

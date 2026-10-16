@@ -44,7 +44,7 @@ export const pgIntrospectionQueries = {
 
   selectIndexesQuery: `
     SELECT t.relname AS table_name, i.relname AS index_name, ix.indisunique AS is_unique,
-           array_agg(a.attname ORDER BY k.ordinality) AS columns
+           array_agg(a.attname::text ORDER BY k.ordinality) AS columns
     FROM pg_index ix
     JOIN pg_class i ON i.oid = ix.indexrelid
     JOIN pg_class t ON t.oid = ix.indrelid

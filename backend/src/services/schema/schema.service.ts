@@ -182,7 +182,8 @@ export const buildSchemaDescription = (schema: NormalizedSchema): string => {
     if (table.indexes?.length) {
       lines.push("Indexes:");
       for (const index of table.indexes) {
-        let indexDesc = `  - ${index.name} on (${index.columns.join(", ")})`;
+        const cols = Array.isArray(index.columns) ? index.columns : [];
+        let indexDesc = `  - ${index.name} on (${cols.join(", ")})`;
         if (index.unique) {
           indexDesc += " [UNIQUE]";
         }
