@@ -23,6 +23,9 @@ export const pruneSchema = async (
     .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
 
   const tableScores = new Map<string, number>();
+  // Tables whose name a message word matches exactly — always included so the
+  // table the user explicitly names can never be pruned out of context.
+  const exactMatches = new Set<string>();
 
   for (const tableName of tableNames) {
     const table = schema.tables[tableName];
@@ -71,6 +74,7 @@ export const pruneSchema = async (
       // like "booking_crops" so the table actually asked about is never dropped.
       if (tableNameLower === word || singular === word || plural === word) {
         score += 120;
+        exactMatches.add(tableName);
       } else if (tableNameLower.includes(word)) {
         score += 30;
       }
@@ -120,6 +124,9 @@ export const pruneSchema = async (
 
   // Controlled FK expansion
   const selectedTables = new Set<string>(primaryTables);
+
+  // Guarantee: any table the user named explicitly is always included.
+  for (const t of exactMatches) selectedTables.add(t);
 
   for (const tableName of primaryTables) {
     const table = schema.tables[tableName];
