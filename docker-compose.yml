@@ -1,0 +1,92 @@
+services:
+
+  # Postgres
+  askdb-postgres:
+    image: postgres:16
+    container_name: askdb-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - 5432:5432
+    volumes:
+      - askdb_postgres_data:/var/lib/postgresql/data
+    networks:
+      - askdb-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  askdb-redis:
+    image: redis:7
+    container_name: askdb-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - askdb_redis_data:/data
+    networks:
+      - askdb-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend
+  askdb-backend:
+    build: ./backend
+    container_name: askdb-backend
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: ${PORT}
+      ENV: ${ENV}
+      ASKDB_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@askdb-postgres:5432/${POSTGRES_DB}
+      REDIS_URL: ${REDIS_URL}
+      AI_API_KEY: ${AI_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_ENCRYPTION_SECRET: ${REDIS_ENCRYPTION_SECRET}
+    depends_on:
+      askdb-postgres:
+        condition: service_healthy
+      askdb-redis:
+        condition: service_healthy
+    networks:
+      - askdb-network
+    volumes:
+      - ./backend/logs:/app/logs
+
+  # Frontend
+  askdb-frontend:
+    build: ./frontend
+    container_name: askdb-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+    depends_on:
+      - askdb-backend
+    networks:
+      - askdb-network
+
+volumes:
+  askdb_postgres_data:
+    driver: local
+  askdb_redis_data:
+    driver: local
+
+networks:
+  askdb-network:
+    driver: bridge
