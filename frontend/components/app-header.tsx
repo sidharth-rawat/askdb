@@ -63,16 +63,16 @@ export function AppHeader() {
 
         <div className="ml-auto flex items-center gap-2">
           <DisconnectDatabase />
-          <Button size="sm" className="hidden sm:flex gap-2 ">
-          <FiGithub size={16}/>
-          <a
-            href="https://github.com/your-username/askdb"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub
-          </a>
-        </Button>
+          <Button asChild size="sm" variant="outline" className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
+            <a
+              href="https://github.com/sidharth-rawat/askdb"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FiGithub size={16} />
+              GitHub
+            </a>
+          </Button>
         </div>
       </div>
     </header>

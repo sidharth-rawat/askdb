@@ -40,7 +40,8 @@ const DisconnectDatabase = () => {
             onClick={handleDisconnect}
             disabled={loading || !connectedDatabase}
             size="sm"
-            className="cursor-pointer gap-1.5 text-primary hover:text-primary/90 disabled:opacity-50"
+            variant="outline"
+            className="cursor-pointer gap-1.5 text-muted-foreground hover:text-destructive hover:border-destructive/50 disabled:opacity-50"
         >
             {loading ? (
                 <Spinner className="h-3.5 w-3.5" />
